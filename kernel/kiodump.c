@@ -572,9 +572,7 @@ static char blk_primary_rw(unsigned int op)
 	return rwchar;
 }
 
-#if ((DISTRIBUTION == DISTRIBUTION_ALIOS && LINUX_VERSION_CODE >= KERNEL_VERSION(4, 9, 93)) \
-	|| LINUX_VERSION_CODE >= KERNEL_VERSION(4, 14, 0)) && LINUX_VERSION_CODE < KERNEL_VERSION(5, 12, 0)
-#else
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 11, 0)
 static int get_partno(struct block_device *bdev)
 {
 	int                  partno;
@@ -738,17 +736,20 @@ static void blk_trace_general(struct bio *bio, struct ioinfo_t *iit)
 
 	partno = iit->partno;
 #if ((DISTRIBUTION == DISTRIBUTION_ALIOS && LINUX_VERSION_CODE >= KERNEL_VERSION(4, 9, 93)) \
-	|| LINUX_VERSION_CODE >= KERNEL_VERSION(4, 14, 0)) && LINUX_VERSION_CODE < KERNEL_VERSION(5, 12, 0)
+	|| LINUX_VERSION_CODE >= KERNEL_VERSION(4, 14, 0)) && LINUX_VERSION_CODE < KERNEL_VERSION(5, 12, 0)    // start:  get_gendisk
 	gendisk = bio->bi_disk;
-#else
+#else                                                                                                          // else :  get_gendisk
 	bdev    = bio->bi_bdev;
 	if (!bdev)
 		return;
 
 	gendisk = bdev->bd_disk;
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 11, 0)                                                               // start:      get_partno
 	if (!partno)
 		partno  = get_partno(bdev);
-#endif
+#endif                                                                                                          // end  :      get_partno
+#endif                                                                                                          // end  :  get_gendisk
 
 	if (IS_ERR_OR_NULL(gendisk))
 		return;

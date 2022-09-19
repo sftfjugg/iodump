@@ -21,9 +21,11 @@
 #include <linux/version.h>
 #include <linux/moduleparam.h>
 #include <linux/stacktrace.h>
-#include <linux/genhd.h>
 #include <linux/nsproxy.h>
 #include <linux/mnt_namespace.h>
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 18, 0)
+#include <linux/genhd.h>
+#endif
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 0, 0)
 #include <linux/bsearch.h>
 #endif
@@ -538,7 +540,9 @@ static char blk_primary_rw(unsigned int op)
 	switch (op) {
 #endif                                                     // end  :      switch
 	case REQ_OP_WRITE:
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 18, 0)          // start:      WRITE_SAME
 	case REQ_OP_WRITE_SAME:
+#endif                                                     // end  :      WRITE_SAME
 		rwchar = 'W';
 		break;
 	case REQ_OP_DISCARD:

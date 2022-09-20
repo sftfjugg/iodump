@@ -6,6 +6,7 @@
  **********************************************************************************/
 
 #define DISTRIBUTION_ALIOS  65
+#define DISTRIBUTION_ANOLIS 130
 #define DISTRIBUTION_CENTOS 67
 #define DISTRIBUTION_UBUNTU 85
 

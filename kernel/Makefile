@@ -17,6 +17,8 @@ ifeq ($(DISTRIBUTION_ID),)
 DISTRIBUTION:=0
 else ifeq ("$(DISTRIBUTION_ID)", "alios")
 DISTRIBUTION:=65
+else ifeq ("$(DISTRIBUTION_ID)", "anolis")
+DISTRIBUTION:=130
 else ifeq ("$(DISTRIBUTION_ID)", "centos")
 DISTRIBUTION:=67
 else ifeq ("$(DISTRIBUTION_ID)", "ubuntu")

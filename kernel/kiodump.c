@@ -740,9 +740,9 @@ static void blk_trace_general(struct bio *bio, struct ioinfo_t *iit)
 
 	partno = iit->partno;
 #if ((DISTRIBUTION == DISTRIBUTION_ALIOS && LINUX_VERSION_CODE >= KERNEL_VERSION(4, 9, 93)) \
-	|| LINUX_VERSION_CODE >= KERNEL_VERSION(4, 14, 0)) && LINUX_VERSION_CODE < KERNEL_VERSION(5, 12, 0)    // start:  get_gendisk
+	|| LINUX_VERSION_CODE >= KERNEL_VERSION(4, 14, 0)) && LINUX_VERSION_CODE < KERNEL_VERSION(5, 12, 0)     // start:  get_gendisk
 	gendisk = bio->bi_disk;
-#else                                                                                                          // else :  get_gendisk
+#else                                                                                                           // else :  get_gendisk
 	bdev    = bio->bi_bdev;
 	if (!bdev)
 		return;

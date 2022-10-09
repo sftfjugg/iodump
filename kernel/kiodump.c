@@ -672,7 +672,7 @@ static char *get_launcher(char *lname)
 	nr_entries        = trace.nr_entries;
 #endif
 	if (nr_entries < 2) {
-		ret = sprintf(lname, "%s", "bug");
+		ret = sprintf(lname, "%s", "unparsed");
 		goto end_launcher;
 	}
 	for (i = nr_entries - 1; i > 0; i--) {

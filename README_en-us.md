@@ -7,9 +7,10 @@ English | [中文](README.md)
   - 1. [Introduction](#Introduction)
   - 2. [Advantage](#Advantage)
   - 3. [Installation](#Installation)
-    - 3.1. [AnolisOS CentOS](#AnolisOS-CentOS)
-    - 3.2. [Ubuntu](#Ubuntu)
-    - 3.3. [Source Code](#Source-Code)
+    - 3.1. [AnolisOS CentOS 1](#AnolisOS-CentOS1)
+    - 3.2. [AnolisOS CentOS 2](#AnolisOS-CentOS2)
+    - 3.3. [Ubuntu](#Ubuntu)
+    - 3.4. [Source Code](#Source-Code)
   - 4. [instructions](#instructions)
     - 4.1. [basic usage](#basic-usage) 
     - 4.2. [option usage](#option-usage)
@@ -57,9 +58,9 @@ The iodump function is powerful, but the iodump system can load kernel modules, 
 
 To use, there are several methods:
 
-<a name="AnolisOS-CentOS"></a>
+<a name="AnolisOS-CentOS1"></a>
 
-### 3.1. AnolisOS CentOS
+### 3.1. AnolisOS CentOS 1
 
 　　Method under AnolisOS and centos.
 
@@ -83,9 +84,56 @@ $ rpm -qp iodump-4.19.91-24.8.an8.x86_64-1.0.1-1.an8.x86_64.rpm --queryformat="%
 iodump-4.19.91-24.8.an8.x86_64---1.0.1---1.an8---x86_64
 ```
 
+<a name="AnolisOS-CentOS2"></a>
+
+### 3.2. AnolisOS CentOS 2
+
+　　In some cases, multiple versions of the kernel are iterated under a single distribution, and this method is suitable for this situation.
+
+　　In the case of Anolis8, there are several smaller distributions of Anolis8.2, 8.4, and 8.6, each of which corresponds to a different kernel version.
+
+> Release&emsp;&emsp;&emsp;&emsp;&emsp;Kernel Version
+
+> 8.2 ANCK 64 bit&emsp;&emsp;4.19.91-25.8.an8.x86_64
+
+> 8.4 ANCK 64 bit&emsp;&emsp;4.19.91-26.an8.x86_64
+
+> 8.6 ANCK 64 bit&emsp;&emsp;4.19.91-26.1.an8.x86_64
+
+　　Newer versions of gcc are usually also updated and are backward compatible with earlier versions. Therefore, we chose the latest version Anolis8.6 as the baler. Install the rpm package of the kernel-devel for all supported kernel versions.
+
+> Release&emsp;&emsp;&emsp;&emsp;&emsp;Kernel-devel
+
+> 8.2 ANCK 64 bit&emsp;&emsp;kernel-devel-4.19.91-25.8.an8.x86_64
+
+> 8.4 ANCK 64 bit&emsp;&emsp;kernel-devel-4.19.91-26.an8.x86_64
+
+> 8.6 ANCK 64 bit&emsp;&emsp;kernel-devel-4.19.91-26.1.an8.x86_64
+
+　　For the relevant version of kernel-devel package, we recommend searching and downloading in Alibaba open source Mirror site.
+
+> https://developer.aliyun.com/packageSearch
+
+　　The specific packaging method is as follows:
+
+
+```bash
+$ rpm -ivh --force kernel-devel-4.19.91-25.8.an8.x86_64.rpm kernel-devel-4.19.91-26.an8.x86_64.rpm
+$ yum install rpm-build rpmdevtools git
+$ rpmdev-setuptree
+$ cd ~/
+$ git clone https://gitee.com/anolis/iodump.git
+$ cp iodump/spec/distribution.spec ~/rpmbuild/SPECS/
+$ tar -zcvf ~/rpmbuild/SOURCES/iodump-$(cat iodump/spec/iodump.spec |grep Version |awk '{print $2}').tar.gz iodump
+$ rpmbuild -bb ~/rpmbuild/SPECS/distribution.spec
+$ cd ~/rpmbuild/RPMS/x86_64/
+$ sudo rpm -ivh iodump-*.an8.x86_64.rpm
+$ sudo rpm -e iodump                                           # remove package
+```
+
 <a name="Ubuntu"></a>
 
-### 3.2. Ubuntu
+### 3.3. Ubuntu
 
 Method under Ubuntu.
 
@@ -102,13 +150,14 @@ $ dpkg -r iodump-4.4.0-87-generic                              # remove package
 
 <a name="Source-Code"></a>
 
-### 3.3. Source Code
+### 3.4. Source Code
 
 Source code installation method.
 
 ```bash
 $ cd ~/
 $ git clone https://gitee.com/anolis/iodump.git
+$ cd iodump
 $ make 
 $ sudo make install
 $ sudo make uninstall                                          # remove

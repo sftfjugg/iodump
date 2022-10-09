@@ -7,9 +7,10 @@
   - 一、[工具介绍](#工具介绍)
   - 二、[工具特点](#工具特点)
   - 三、[工具安装](#工具安装)
-    - 3.1、[rpm包打包方法](#rpm包打包方法)
-    - 3.2、[deb包打包方法](#deb包打包方法)
-    - 3.3、[源代码编译安装](#源代码编译安装)
+    - 3.1、[rpm包打包方法1](#rpm包打包方法1)
+    - 3.2、[rpm包打包方法2](#rpm包打包方法2)
+    - 3.3、[deb包打包方法](#deb包打包方法)
+    - 3.4、[源代码编译安装](#源代码编译安装)
   - 四、[使用说明](#使用说明)
     - 4.1、[基本使用](#基本使用)
     - 4.2、[参数说明](#参数说明)
@@ -67,11 +68,11 @@
 
 &emsp;&emsp;工具的安装，有如下几种方法:
 
-<a name="rpm包打包方法" ></a>
+<a name="rpm包打包方法1" ></a>
 
-### 3.1、rpm包打包方法
+### 3.1、rpm包打包方法1
 
-　　rpm包的打包方法如下，本方法适用于AnolisOS and CentOS等操作系统环境。
+&emsp;&emsp;rpm包的打包方法如下，本方法适用于AnolisOS and CentOS等操作系统环境。
 
 ```bash
 $ yum install rpm-build rpmdevtools git
@@ -86,19 +87,64 @@ $ sudo rpm -ivh iodump-$(uname -r)-*.an8.x86_64.rpm
 $ sudo rpm -e iodump-$(uname -r)                   # remove package
 ```
 
-　　iodump工具本质上是内核驱动模块，在一个特定内核版本上生成的rpm包在另外一个不同的内核版本上是不能正常工作的。在这里我们将内核版本信息加入到rpm包的name部分，用以识别不同内核版本的rpm包。这里我们推荐使用如下rpm的查询命令区分一个rpm包的name、version、rel
-ease和arch四个部分的内容。我们使用连续的3横线来区隔不同的部分，结果一目了然。
+&emsp;&emsp;iodump工具本质上是内核驱动模块，在一个特定内核版本上生成的rpm包在另外一个不同的内核版本上是不能正常工作的。在这里我们将内核版本信息加入到rpm包的name部分，用以识别不同内核版本的rpm包。这里我们推荐使用如下rpm的查询命令区分一个rpm包的name、version、release和arch四个部分的内容。我们使用连续的3横线来区隔不同的部分，结果一目了然。
 
 ```bash
 $ rpm -qp iodump-4.19.91-24.8.an8.x86_64-1.0.1-1.an8.x86_64.rpm --queryformat="%{name}---%{version}---%{release}---%{arch}\n"
 iodump-4.19.91-24.8.an8.x86_64---1.0.1---1.an8---x86_64
 ```
 
+<a name="rpm包打包方法2" ></a>
+
+### 3.2、rpm包打包方法2
+
+&emsp;&emsp;有些情况下，在一个发行版下面，迭代了很多版本的内核，本方法适用于这种场景。
+
+&emsp;&emsp;这里以Anolis 8为例，有Anolis8.2、8.4和8.6等多个小的发行版本，每个小版本也分别对应了不同的内核版本。
+
+> Release&emsp;&emsp;&emsp;&emsp;&emsp;Kernel Version
+
+> 8.2 ANCK 64位&emsp;&emsp;4.19.91-25.8.an8.x86_64
+
+> 8.4 ANCK 64位&emsp;&emsp;4.19.91-26.an8.x86_64
+
+> 8.6 ANCK 64位&emsp;&emsp;4.19.91-26.1.an8.x86_64
+
+&emsp;&emsp;此时，新版本的gcc版本通常也更新，会对低版本向下兼容。因此，我们选择最新版本Anolis8.6作为打包机。并且安装上所有需要支持的内核版本对应的kernel-devel的rpm包。
+
+> Release&emsp;&emsp;&emsp;&emsp;&emsp;Kernel-devel
+
+> 8.2 ANCK 64位&emsp;&emsp;kernel-devel-4.19.91-25.8.an8.x86_64
+
+> 8.4 ANCK 64位&emsp;&emsp;kernel-devel-4.19.91-26.an8.x86_64
+
+> 8.6 ANCK 64位&emsp;&emsp;kernel-devel-4.19.91-26.1.an8.x86_64
+
+&emsp;&emsp;相关版本的kernel-devel包，我们推荐在阿里巴巴开源镜像站进行搜索查找并下载。
+
+> https://developer.aliyun.com/packageSearch
+
+&emsp;&emsp;具体打包方案如下：
+
+```bash
+$ rpm -ivh --force kernel-devel-4.19.91-25.8.an8.x86_64.rpm kernel-devel-4.19.91-26.an8.x86_64.rpm
+$ yum install rpm-build rpmdevtools git
+$ rpmdev-setuptree
+$ cd ~/
+$ git clone https://gitee.com/anolis/iodump.git
+$ cp iodump/spec/distribution.spec ~/rpmbuild/SPECS/
+$ tar -zcvf ~/rpmbuild/SOURCES/iodump-$(cat iodump/spec/iodump.spec |grep Version |awk '{print $2}').tar.gz iodump
+$ rpmbuild -bb ~/rpmbuild/SPECS/distribution.spec
+$ cd ~/rpmbuild/RPMS/x86_64/
+$ sudo rpm -ivh iodump-*.an8.x86_64.rpm
+$ sudo rpm -e iodump                                           # remove package
+```
+
 <a name="deb包打包方法" ></a>
 
-### 3.2、deb包打包方法
+### 3.3、deb包打包方法
 
-　　deb包的打包方法如下，本方法适用于Ubuntu等操作系统环境。
+&emsp;&emsp;deb包的打包方法如下，本方法适用于Ubuntu等操作系统环境。
 
 ```bash
 $ apt-get update
@@ -113,13 +159,14 @@ $ dpkg -r iodump-4.4.0-87-generic                              # remove package
 
 <a name="源代码编译安装" ></a>
 
-### 3.3、源代码编译安装
+### 3.4、源代码编译安装
 
-　　源代码安装方法。
+&emsp;&emsp;源代码安装方法。
 
 ```bash
 $ cd ~/
 $ git clone https://gitee.com/anolis/iodump.git
+$ cd iodump
 $ make
 $ sudo make install
 $ sudo make uninstall                                          # remove
